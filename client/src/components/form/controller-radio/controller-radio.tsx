@@ -6,7 +6,6 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material";
-import { error } from "console";
 import {
   Control,
   Controller,
@@ -45,7 +44,17 @@ export default function ControllerRadio<T extends FieldValues>({
             {
                 label && <FormLabel>{label}</FormLabel>
             }
-          <RadioGroup {...field} value={field.value ?? ""}>
+          <RadioGroup {...field} value={field.value ?? ""}
+            onChange={(event) => {
+              const selectedOption = options.find(
+                (option) => String(option.value) === event.target.value
+              );
+
+              if (selectedOption) {
+                field.onChange(selectedOption.value);
+              }
+            }}
+          >
             {options.map((option) => (
               <FormControlLabel
                 key={option.label}

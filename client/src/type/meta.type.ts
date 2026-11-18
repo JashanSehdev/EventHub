@@ -15,3 +15,9 @@ export interface PaginationRequest{
     page : number,
     limit: number
 }
+
+export interface ResponseType <T>{
+    success : boolean
+    message : string
+    data : T
+}

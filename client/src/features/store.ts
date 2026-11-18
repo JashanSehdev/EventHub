@@ -13,20 +13,22 @@ import {
 import storage from 'redux-persist/lib/storage';
 import { useDispatch, useSelector } from 'react-redux';
 import authReducer from './auth/auth.slice'
+import eventReducer from './events/events.slice'
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist : ['auth']
+  whitelist : ['auth', 'event']
 };
 
 const rootReducer = combineReducers({
-  auth: authReducer,
+  auth : authReducer,
+  event : eventReducer
 });
 
 const persistedReducer = persistReducer(
   persistConfig,
-  rootReducer
+  rootReducer,
 );
 
 export const store = configureStore({

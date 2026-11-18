@@ -6,7 +6,7 @@ export const eventSchema = z.object({
     publish : z.boolean().default(false),
     startTime : z.string().min(6, 'start date required'),
     endTime : z.string().min(6, 'start date required'),
-    location : z.string(),
+    location : z.string().min( 1, 'location Required'),
 })
 
 export type EventInput = z.input<typeof eventSchema> 

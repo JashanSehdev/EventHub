@@ -1,6 +1,7 @@
 import { Box, Container, Stack, Typography } from "@mui/material";
 import styles from "./page.module.css";
 import Navbar from "@/components/navbar/navbar";
+import ListEvents from "@/components/event/list-events/list-events";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
           <Typography variant={"h1"}>Welcome</Typography>
           <Typography sx={{paddingLeft: 1}} variant="h1">Users..</Typography>
         </Stack>
+        <ListEvents />
       </Box>
     </Container>
   );
