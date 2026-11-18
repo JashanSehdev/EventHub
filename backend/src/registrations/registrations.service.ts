@@ -105,18 +105,19 @@ export class RegistrationsService extends BaseService<Registration> {
       eventId: eventId,
     };
 
-    // const [where, order] = applyFilters(
-    //   filterAttendee,
-    //   { where: baseWhere },
-    //   { searchOn: ['Attendee'] },
-    // );
+    const [where, order] = applyFilters(
+      filterAttendee,
+      { where: baseWhere },
+      { searchOn: ['Attendee.username'] },
+    );
 
     const [attendees, total] = await this.registrationRepository.findAndCount({
-      where: baseWhere,
+      where,
 
       relations: {
         Attendee: true,
       },
+      order,
       skip,
       take: limit,
     });

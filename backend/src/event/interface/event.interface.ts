@@ -17,5 +17,6 @@ export interface IEvent {
     createdAt : string | Date,
     updatedAt : string | Date
     organizer : Organizer
-    registeredUsers : number
+    registeredUsers : number,
+    isRegistered ?: boolean
 }

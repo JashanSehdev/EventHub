@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { EventService } from './event.service.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
 import { UpdateEventDto } from './dto/update-event.dto.js';
@@ -6,8 +6,11 @@ import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { FilterEventDto } from './dto/filter-event.dto.js';
 import { Roles } from '../auth/decorator/roles.decorator.js';
 import { UserRole } from '../users/enum/roles.enum.js';
+import { RoleGuard } from '../auth/guard/auth.guard.js';
 
 @Controller('event')
+@UseGuards(RoleGuard)
+
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
@@ -22,9 +25,15 @@ export class EventController {
     return this.eventService.findEvents(query);
   }
 
+  @Roles([UserRole.ORGANIZER])
+  @Get(`created`)
+  getCreatedEvent (@Param() query : FilterEventDto,@CurrentUser('id') userId : number ) {
+    return this.eventService.findCreatedEvents(query, userId)
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.eventService.findEvent(+id);
+  findOne(@Param('id') id: string,  @CurrentUser('id') userId : number) {
+    return this.eventService.findEvent(+id, userId);
   }
 
   @Roles([UserRole.ORGANIZER])

@@ -1,21 +1,23 @@
-'use client'
-import { EventOutput } from "@/components/event/event-form/event-form.type";
-import { createEventAsync } from "@/features/events/handle-events/events.action";
+"use client";
+import {
+  fetchEventAsync,
+} from "@/features/events/handle-events/events.action";
 import { useAppDispatch } from "@/features/store";
-import { IEvent } from "@/type/event.type"
-import { useState } from "react"
+import { EventFilter, IEvent } from "@/type/event.type";
+import usePaginatedList from "./use-paginatinated-list";
+import { useCallback } from "react";
 
+export function useAllEvents() {
+  const dispatch = useAppDispatch();
 
-export function UseEvents () {
-    const [events, setEvents] = useState<IEvent[]>([]);
-    const dispatch = useAppDispatch()
+  const fetchData = useCallback(
+    (params: { page: number; limit: number } & EventFilter) =>
+      dispatch(fetchEventAsync(params)).unwrap(),
+    [dispatch],
+  );
 
-    const createEvent = (data : EventOutput) => {
-        dispatch(createEventAsync(data));
-        
-    }
-    return{
-        events,
-        createEvent
-    }
+  return usePaginatedList<IEvent, EventFilter>({
+    fetchData,
+    limit: 5,
+  });
 }

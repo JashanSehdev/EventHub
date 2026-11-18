@@ -4,7 +4,6 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto.js';
 import { BaseService } from '../common/service/base.service.js';
@@ -21,6 +20,7 @@ import { paginationResponse } from '../common/utlis/pagination.js';
 import { PaginationResult } from '../common/interfaces/pagination.interface.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateEventDto } from './dto/update-event.dto.js';
+import { Registration } from '../registrations/entities/registration.entity.js';
 
 @Injectable()
 export class EventService extends BaseService<Event> {
@@ -28,6 +28,9 @@ export class EventService extends BaseService<Event> {
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
     private readonly userService: UsersService,
+
+    @InjectRepository(Registration)
+    private readonly registrationRepository: Repository<Registration>,
   ) {
     super(eventRepository);
   }
@@ -55,7 +58,7 @@ export class EventService extends BaseService<Event> {
     return successResponse('event Created successfully', dispatchEvent);
   }
 
-  async getEvent(eventId: number): Promise<IEvent | null> {
+  async getEvent(eventId: number, userId?: number): Promise<IEvent | null> {
     const event = await this.eventRepository.findOne({
       where: {
         id: eventId,
@@ -72,6 +75,20 @@ export class EventService extends BaseService<Event> {
         },
       },
     });
+
+    let isRegistered: boolean = false;
+
+    if (typeof userId === "number") {
+      isRegistered = await this.registrationRepository.exists({
+        relations: {Attendee : true},
+        where : {
+          userId,
+          eventId
+        }
+      
+      });
+    }
+
 
     if (!event) return null;
     const dispatchEvent: IEvent = {
@@ -92,20 +109,22 @@ export class EventService extends BaseService<Event> {
         email: event.Organizer.email,
         avatar: event.Organizer.avatar,
       },
+      isRegistered
     };
 
     return dispatchEvent;
   }
 
-  async findEvents(
+  async findCreatedEvents(
     filterEvents: FilterEventDto,
+    userId: number,
   ): Promise<PaginationResult<IEvent>> {
     const baseWhere: FindOptionsWhere<Event> = {};
     const page = filterEvents.page;
     const limit = filterEvents.limit;
     const skip = (page - 1) * limit;
 
-    baseWhere;
+    baseWhere.organizerId = userId;
 
     const [where, order] = applyFilters(
       filterEvents,
@@ -157,12 +176,81 @@ export class EventService extends BaseService<Event> {
     return paginationResponse(mappedEvents, page, limit, total);
   }
 
-  async findEvent(id: number): Promise<IEvent> {
-    const event = await this.getEvent(id);
+  async findEvents(
+    filterEvents: FilterEventDto,
+  ): Promise<PaginationResult<IEvent>> {
+    const baseWhere: FindOptionsWhere<Event> = {};
+    const page = filterEvents.page;
+    const limit = filterEvents.limit;
+    const skip = (page - 1) * limit;
 
+    baseWhere.publish = true;
+    const [where, order] = applyFilters(
+      filterEvents,
+      { where: baseWhere },
+      { searchOn: ['title', 'description'] },
+    );
+
+    const [events, total] = await Promise.all([
+      this.eventRepository.find({
+        where,
+        relations: {
+          Organizer: true,
+        },
+        select: {
+          Organizer: {
+            id: true,
+            username: true,
+            email: true,
+            avatar: true,
+          },
+        },
+        order,
+        skip,
+        take: limit,
+      }),
+
+      this.eventRepository.count({
+        where,
+      }),
+    ]);
+
+    console.log('Events returned:', events.length);
+    console.log('Total from count():', total);
+
+    console.log('Events returned:', events.length);
+    console.log('Total from count():', total);
+
+    const mappedEvents: IEvent[] = events.map((event) => {
+      return {
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        organizerId: event.organizerId,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        location: event.location,
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt,
+        publish: event.publish,
+        registeredUsers: event.activeRegistrations,
+        organizer: {
+          id: event.Organizer.id,
+          username: event.Organizer.username,
+          email: event.Organizer.email,
+          avatar: event.Organizer.avatar,
+        },
+      };
+    });
+
+    return paginationResponse(mappedEvents, page, limit, total);
+  }
+
+  async findEvent(id: number, userId ?: number): Promise<ResponseType<IEvent>> {
+    const event = await this.getEvent(id, userId);
     if (!event) throw new NotFoundException('Event not found');
 
-    return event;
+    return successResponse('event fetched successfully', event);
   }
 
   async updateEvent(

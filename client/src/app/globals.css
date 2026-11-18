@@ -29,3 +29,8 @@
 body{
   background-color: var(--mui-bg-default);
 }
+
+.styleLetters{
+  letter-spacing: 2;
+  word-spacing: 3;
+}

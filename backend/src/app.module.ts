@@ -9,6 +9,7 @@ import { AuthMiddleware } from './middleware/auth.middleware.js';
 import { EventModule } from './event/event.module.js';
 import { NotifcationsModule } from './notifcations/notifcations.module.js';
 import { RegistrationsModule } from './registrations/registrations.module.js';
+import { NotifcationsGateway } from './notifcations/notifcations.gateway.js';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -54,7 +55,7 @@ import { RegistrationsModule } from './registrations/registrations.module.js';
     RegistrationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, NotifcationsGateway],
 })
 export class AppModule implements NestModule{
   configure(consumer: MiddlewareConsumer) {
@@ -65,6 +66,7 @@ export class AppModule implements NestModule{
         {path :'/auth/register', method: RequestMethod.POST},
         {path :'/auth/google', method: RequestMethod.POST},
         {path :'/auth/logout', method: RequestMethod.GET},
+        {path :'/event', method: RequestMethod.GET},
       )
       .forRoutes('*')
   }

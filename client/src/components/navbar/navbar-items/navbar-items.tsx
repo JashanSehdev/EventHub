@@ -14,7 +14,7 @@ import { useAppSelector } from "@/features/store";
 const adminItems = [
     {
     label: "Dashboard",
-    href: "/admin/",
+    href: "/dashboard/",
   },
 ]
 const navItems = [
@@ -35,7 +35,7 @@ export default function NavbarItems() {
   return (
     <Stack className={styles.container} direction={'row'}>
 
-        { user?.role === 'admin' && adminItems.map((item) => (
+        { user?.role === 'organizer' && adminItems.map((item) => (
           <Link key={item.label} href={item.href} className={styles.link}>
             <ListItem
             >

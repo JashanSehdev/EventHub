@@ -17,11 +17,6 @@ export class NotifcationsController {
     return this.notifcationsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notifcationsService.findOne(+id);
-  }
-
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateNotifcationDto: UpdateNotifcationDto) {
     return this.notifcationsService.update(+id, updateNotifcationDto);

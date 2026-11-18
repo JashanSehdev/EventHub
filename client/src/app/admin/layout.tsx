@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const router = useRouter()
   const user = useAppSelector((state) => state.auth.user)
   if(user?.role !== 'admin') {
-    router.replace("/")
+    router.back()
   }
   return (
     <div>

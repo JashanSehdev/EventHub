@@ -1,35 +1,33 @@
-'use client'
-import { fetchEventAsync } from "@/features/events/handle-events/events.action";
-import { useAppDispatch, useAppSelector } from "@/features/store";
-import { CircularProgress, Stack, Typography } from "@mui/material";
-import { useEffect } from "react";
+"use client";
+
+import { Box, Button, CircularProgress, Pagination, Stack, Typography } from "@mui/material";
 import EventCard from "./list-event-card/event-card";
+import { useAllEvents } from "@/hooks/use-events";
 
-export default function ListEvents () {
-    const dispatch = useAppDispatch()
-    const {events, loading} = useAppSelector((state) => state.event)
+export default function ListAllEvents() {
+  const allEvents = useAllEvents();
 
-    useEffect(() => {
-        dispatch(fetchEventAsync());
-    },[dispatch])
+  return (
+    <Stack spacing={ 2}>
+      <Stack direction={"row"} sx={{ flexWrap: "wrap" }} useFlexGap spacing={2}>
+        {allEvents.loading && <CircularProgress />}
 
-
-    return (
-       <Stack direction={'row'} sx={{flexWrap: 'wrap'}} useFlexGap spacing={2}>
-        {   
-            loading && <CircularProgress />
-        }
-
-        {
-            !loading && (
-                events.length === 0 ? (
-                    <Typography>No Events</Typography>
-                ) : (
-                    events.map((event) => <EventCard key={event.id} event={event} />)
-                )
-            )
-        }
-       </Stack>
-    )
-
+        {!allEvents.loading &&
+          (allEvents.data.length === 0 ? (
+            <Typography>No Events</Typography>
+          ) : (
+            allEvents.data.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))
+          ))}
+      </Stack>
+      <Box>
+      <Pagination
+        page={allEvents.page}
+        onChange={(_, page: number) => allEvents.setPage(page)}
+        count={allEvents.totalPages}
+      />
+      </Box>
+    </Stack>
+  );
 }

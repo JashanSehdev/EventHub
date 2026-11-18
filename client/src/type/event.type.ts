@@ -18,4 +18,11 @@ export interface IEvent {
     updatedAt : string | Date
     organizer : Organizer
     registeredUsers : number
+    isRegistered ?: boolean
+}
+
+export interface EventFilter {
+    search ?: string,
+    sortBy ?: string,
+    orderBy ?: string
 }
